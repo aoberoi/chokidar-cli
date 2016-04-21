@@ -1,5 +1,5 @@
 {
-  "name": "chokidar-cli",
+  "name": "@aoberoi/chokidar-cli",
   "description": "Ultra-fast cross-platform command line utility to watch file system changes.",
   "version": "1.2.0",
   "keywords": [
@@ -19,14 +19,17 @@
   "bin": {
     "chokidar": "./index.js"
   },
-  "homepage": "https://github.com/kimmobrunfeldt/chokidar-cli",
+  "homepage": "https://github.com/aoberoi/chokidar-cli",
   "author": "Kimmo Brunfeldt <kimmobrunfeldt@gmail.com> (http://kimmobrunfeldt.github.io/)",
+  "contributors": [
+    "Ankur Oberoi <aoberoi@gmail.com> (https://aoberoi.me)"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/kimmobrunfeldt/chokidar-cli.git"
+    "url": "https://github.com/aoberoi/chokidar-cli.git"
   },
   "bugs": {
-    "url": "http://github.com/kimmobrunfeldt/chokidar-cli/issues"
+    "url": "http://github.com/aoberoi/chokidar-cli/issues"
   },
   "license": "MIT",
   "dependencies": {
