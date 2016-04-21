@@ -102,6 +102,8 @@ Options:
                           format: /yourmatch/i
   --initial               When set, command is initially run once
                                                       [boolean] [default: false]
+  --concurrent            When set, command is not killed before invoking again
+                                                      [boolean] [default: false]
   -p, --polling           Whether to use fs.watchFile(backed by polling) instead
                           of fs.watch. This might lead to high CPU utilization.
                           It is typically necessary to set this to true to
