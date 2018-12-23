@@ -1,7 +1,7 @@
 {
-  "name": "chokidar-cli",
+  "name": "@aoberoi/chokidar-cli",
   "description": "Ultra-fast cross-platform command line utility to watch file system changes.",
-  "version": "1.2.0",
+  "version": "1.3.0-dev",
   "keywords": [
     "fs",
     "watch",
@@ -19,33 +19,30 @@
   "bin": {
     "chokidar": "./index.js"
   },
-  "homepage": "https://github.com/kimmobrunfeldt/chokidar-cli",
+  "homepage": "https://github.com/aoberoi/chokidar-cli",
   "author": "Kimmo Brunfeldt <kimmobrunfeldt@gmail.com> (http://kimmobrunfeldt.github.io/)",
+  "contributors": [
+    "Ankur Oberoi <aoberoi@gmail.com> (https://aoberoi.me)"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/kimmobrunfeldt/chokidar-cli.git"
+    "url": "https://github.com/aoberoi/chokidar-cli.git"
   },
   "bugs": {
-    "url": "http://github.com/kimmobrunfeldt/chokidar-cli/issues"
+    "url": "http://github.com/aoberoi/chokidar-cli/issues"
   },
   "license": "MIT",
   "dependencies": {
     "anymatch": "^1.1.0",
     "bluebird": "^2.9.24",
     "chokidar": "^1.0.1",
-    "lodash": "^3.7.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1",
     "npm-run-all": "1.6.0",
-    "shell-quote": "^1.4.3",
     "yargs": "^3.7.2"
   },
   "devDependencies": {
-    "commander": "^2.8.0",
-    "mocha": "^2.2.4",
-    "mustache": "^2.0.0",
-    "releasor": "^1.2.1",
-    "semver": "^4.3.3",
-    "shelljs": "^0.4.0",
-    "string": "^3.1.1"
+    "mocha": "^5.2.0"
   },
   "scripts": {
     "test": "mocha"

@@ -1,6 +1,8 @@
-# Chokidar CLI
+# Chokidar CLI (temporary fork)
 
-[![Build Status](https://travis-ci.org/kimmobrunfeldt/chokidar-cli.svg?branch=master)](https://travis-ci.org/kimmobrunfeldt/chokidar-cli)
+**NOTE:** This package is a temporary (hopefully) fork of [the original](https://github.com/kimmobrunfeldt/chokidar-cli) so that I could use [functionality](https://github.com/kimmobrunfeldt/chokidar-cli/pull/29) that is taking some time to merge. I hope not to maintain this package for long.
+
+[![Build Status](https://travis-ci.org/aoberoi/chokidar-cli.svg?branch=master)](https://travis-ci.org/aoberoi/chokidar-cli)
 
 Fast cross-platform command line utility to watch file system changes.
 
@@ -24,13 +26,13 @@ The underlying watch library is [Chokidar](https://github.com/paulmillr/chokidar
 If you need it only with NPM scripts:
 
 ```bash
-npm install chokidar-cli
+npm install @aoberoi/chokidar-cli
 ```
 
 Or globally
 
 ```bash
-npm install -g chokidar-cli
+npm install -g @aoberoi/chokidar-cli
 ```
 
 ## Usage
@@ -101,6 +103,8 @@ Options:
                           filename. Supports glob patters or regexes using
                           format: /yourmatch/i
   --initial               When set, command is initially run once
+                                                      [boolean] [default: false]
+  --concurrent            When set, command is not killed before invoking again
                                                       [boolean] [default: false]
   -p, --polling           Whether to use fs.watchFile(backed by polling) instead
                           of fs.watch. This might lead to high CPU utilization.

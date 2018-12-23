@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var exec = require('child_process').exec;
 var assert = require('assert');
 var utils = require('../utils');
 var run = utils.run;
@@ -110,7 +109,8 @@ describe('chokidar-cli', function() {
         })
         .then(function childProcessExited(exitCode) {
             done();
-        });
+        })
+        .catch(done);
 
         setTimeout(function afterWatchIsReady() {
             fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');
@@ -143,7 +143,8 @@ describe('chokidar-cli', function() {
         })
         .then(function childProcessExited(exitCode) {
             done();
-        });
+        })
+        .catch(done);
 
         setTimeout(function afterWatchIsReady() {
             fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');

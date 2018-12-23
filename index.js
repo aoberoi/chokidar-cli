@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-var Promise = require('bluebird');
-var _ = require('lodash');
+const debounce = require('lodash.debounce');
+const throttle = require('lodash.throttle');
 var chokidar = require('chokidar');
 var spawn = require('npm-run-all/lib/spawn');
 
@@ -136,7 +136,7 @@ var argv = require('yargs')
 
 function main() {
     var userOpts = getUserOpts(argv);
-    var opts = _.merge(defaultOpts, userOpts);
+    var opts = Object.assign({}, defaultOpts, userOpts);
     startWatching(opts);
 }
 
@@ -149,7 +149,7 @@ function startWatching(opts) {
     var child;
     var chokidarOpts = createChokidarOpts(opts);
     var watcher = chokidar.watch(opts.patterns, chokidarOpts);
-    var execFn = _.debounce(_.throttle(function(event, path) {
+    var execFn = debounce(throttle(function(event, path) {
         if (child) child.removeAllListeners();
         child = spawn(SHELL_PATH, [
             EXECUTE_OPTION,
@@ -163,7 +163,7 @@ function startWatching(opts) {
 
     watcher.on('all', function(event, path) {
         var description = EVENT_DESCRIPTIONS[event] + ':';
-        var executeCommand = _.partial(execFn, event, path);
+        var executeCommand = () => execFn(event, path);
 
         if (opts.verbose) {
             console.error(description, path);
@@ -220,9 +220,9 @@ function _resolveIgnoreOpt(ignoreOpt) {
         return ignoreOpt;
     }
 
-    var ignores = !_.isArray(ignoreOpt) ? [ignoreOpt] : ignoreOpt;
+    var ignores = !Array.isArray(ignoreOpt) ? [ignoreOpt] : ignoreOpt;
 
-    return _.map(ignores, function(ignore) {
+    return ignores.map(function(ignore) {
         var isRegex = ignore[0] === '/' && ignore[ignore.length - 1] === '/';
         if (isRegex) {
             // Convert user input to regex object

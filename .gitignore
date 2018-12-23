@@ -1,5 +1,3 @@
 node_modules
-test-fixtures
-coverage
-*.bak
-*.log
+package-lock.json
+test/dir/change
