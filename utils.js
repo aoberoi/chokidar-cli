@@ -11,7 +11,7 @@ var EXECUTE_OPTION = process.env.COMSPEC !== undefined && process.env.SHELL === 
 function run(cmd, opts) {
     if (!SHELL_PATH) {
         // If we cannot resolve shell, better to just crash
-        throw new Error('$SHELL environment variable is not set.');
+        return Promise.reject(new Error('$SHELL environment variable is not set.'));
     }
 
     opts = Object.assign({}, {

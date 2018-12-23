@@ -24,6 +24,7 @@ process.chdir(pathJoin(testDir, '..'));
 describe('chokidar-cli', function() {
     this.timeout(5000);
 
+    // NOTE: it seems that this hook isn't always running, because we're getting the changed files in the working dir
     afterEach(function clean(done) {
         if (changeFileExists()) {
             unlinkSync(resolve(CHANGE_FILE));
