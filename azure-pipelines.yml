@@ -27,6 +27,8 @@ steps:
 
 - script: |
     npm install -g npm@latest
+    node --version
+    npm --version
   displayName: 'update npm'
 
 - script: |
