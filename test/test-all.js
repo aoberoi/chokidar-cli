@@ -21,18 +21,18 @@ const TIMEOUT_KILL = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 1000;
 const testDir = pathResolve(__dirname);
 process.chdir(pathJoin(testDir, '..'));
 
-describe('chokidar-cli', function() {
+describe('chokidar-cli', function () {
 
-    it('help should be successful', function() {
-        return run('node index.js --help', {pipe: DEBUG_TESTS})
+    it('help should be successful', () => {
+        return run('node index.js --help', { pipe: DEBUG_TESTS })
             .then((exitCode) => {
                 // exit code 0 means success
                 assert.strictEqual(exitCode, 0);
             });
     });
 
-    it('version should be successful', function() {
-        return run('node index.js -v', {pipe: DEBUG_TESTS})
+    it('version should be successful', () => {
+        return run('node index.js -v', { pipe: DEBUG_TESTS })
             .then(function(exitCode) {
                 // exit code 0 means success
                 assert.strictEqual(exitCode, 0);
@@ -53,7 +53,7 @@ describe('chokidar-cli', function() {
             return run('git checkout HEAD dir', {pipe: DEBUG_TESTS, cwd: testDir});
         });
 
-        it('**/*.less should detect all less files in dir tree', function(done) {
+        it('**/*.less should detect all less files in dir tree', (done) => {
             var killed = false;
 
             // Use a file to detect that trigger command is actually run
@@ -91,7 +91,7 @@ describe('chokidar-cli', function() {
             }, TIMEOUT_WATCH_READY);
         });
 
-        it('should throttle invocations of command', function(done) {
+        it('should throttle invocations of command', (done) => {
             const touch = 'touch ' + CHANGE_FILE;
             const changedDetectedTime = 100;
             const throttleTime = (2 * changedDetectedTime) + 100;
@@ -124,7 +124,7 @@ describe('chokidar-cli', function() {
             }, TIMEOUT_WATCH_READY);
         });
 
-        it('should debounce invocations of command', function(done) {
+        it('should debounce invocations of command', (done) => {
             const touch = 'touch ' + CHANGE_FILE;
             const changedDetectedTime = 100;
             const debounceTime = (2 * changedDetectedTime) + 100;
@@ -161,7 +161,7 @@ describe('chokidar-cli', function() {
 
         });
 
-        it('should replace {path} and {event} in command', function(done) {
+        it('should replace {path} and {event} in command', (done) => {
             const command = "echo '{event}:{path}' > " + CHANGE_FILE;
 
             setTimeout(function() {
