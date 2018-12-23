@@ -2,9 +2,8 @@
 
 const { unlinkSync, writeFileSync, readFileSync, existsSync } = require('fs');
 const { resolve: pathResolve, join: pathJoin } = require('path');
-var assert = require('assert');
-var utils = require('../utils');
-var run = utils.run;
+const assert = require('assert');
+const { run } = require('../utils');
 
 // If true, output of commands are shown
 var DEBUG_TESTS = false;
