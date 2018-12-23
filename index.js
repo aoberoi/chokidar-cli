@@ -3,7 +3,7 @@
 const debounce = require('lodash.debounce');
 const throttle = require('lodash.throttle');
 var chokidar = require('chokidar');
-var spawn = require('npm-run-all/lib/spawn').default;
+var spawn = require('npm-run-all/lib/spawn');
 
 var EVENT_DESCRIPTIONS = {
     add: 'File added',
