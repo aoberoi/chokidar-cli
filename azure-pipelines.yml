@@ -30,10 +30,10 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    npm run test-and-publish
-  displayName: 'npm test'
+    npx mocha test --reporter mocha-junit-reporter
+  displayName: 'test'
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFormat: 'xUnit'
-    testResultsFiles: 'test_results.xml'
+    testResultsFormat: 'JUnit'
+    testResultsFiles: 'test-results.xml'

@@ -42,10 +42,10 @@
     "yargs": "^3.7.2"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "mocha-junit-reporter": "^1.18.0"
   },
   "scripts": {
-    "test": "mocha",
-    "test-and-publish": "mocha --reporter xunit --reporter-options output=test_results.xml"
+    "test": "mocha"
   }
 }
