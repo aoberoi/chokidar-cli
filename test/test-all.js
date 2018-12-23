@@ -1,6 +1,6 @@
 // Test basic usage of cli. Contains confusing setTimeouts
 
-var fs = require('fs');
+const { unlinkSync, writeFileSync, readFileSync, existsSync } = require('fs');
 var path = require('path');
 var assert = require('assert');
 var utils = require('../utils');
@@ -27,7 +27,7 @@ describe('chokidar-cli', function() {
 
     afterEach(function clean(done) {
         if (changeFileExists()) {
-            fs.unlinkSync(resolve(CHANGE_FILE));
+            unlinkSync(resolve(CHANGE_FILE));
         }
 
         // Clear all changes in the test directory
@@ -84,7 +84,7 @@ describe('chokidar-cli', function() {
         });
 
         setTimeout(function afterWatchIsReady() {
-            fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');
+            writeFileSync(resolve('dir/subdir/c.less'), 'content');
 
             setTimeout(function() {
                 assert(changeFileExists(), 'change file should exist');
@@ -113,11 +113,11 @@ describe('chokidar-cli', function() {
         .catch(done);
 
         setTimeout(function afterWatchIsReady() {
-            fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');
+            writeFileSync(resolve('dir/subdir/c.less'), 'content');
             setTimeout(function() {
                 assert(changeFileExists(), 'change file should exist after first change');
-                fs.unlinkSync(resolve(CHANGE_FILE));
-                fs.writeFileSync(resolve('dir/subdir/c.less'), 'more content');
+                unlinkSync(resolve(CHANGE_FILE));
+                writeFileSync(resolve('dir/subdir/c.less'), 'more content');
                 setTimeout(function() {
                     assert.equal(changeFileExists(), false, 'change file should not exist after second change');
                 }, changedDetectedTime);
@@ -147,10 +147,10 @@ describe('chokidar-cli', function() {
         .catch(done);
 
         setTimeout(function afterWatchIsReady() {
-            fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');
+            writeFileSync(resolve('dir/subdir/c.less'), 'content');
             setTimeout(function() {
                 assert.equal(changeFileExists(), false, 'change file should not exist earlier than debounce time (first)');
-                fs.writeFileSync(resolve('dir/subdir/c.less'), 'more content');
+                writeFileSync(resolve('dir/subdir/c.less'), 'more content');
                 setTimeout(function() {
                     assert.equal(changeFileExists(), false, 'change file should not exist earlier than debounce time (second)');
                 }, changedDetectedTime);
@@ -166,7 +166,7 @@ describe('chokidar-cli', function() {
         var command = "echo '{event}:{path}' > " + CHANGE_FILE;
 
         setTimeout(function() {
-          fs.writeFileSync(resolve('dir/a.js'), 'content');
+          writeFileSync(resolve('dir/a.js'), 'content');
         }, TIMEOUT_WATCH_READY);
 
         run('node ../index.js "dir/a.js" -c "' + command + '"', {
@@ -177,7 +177,7 @@ describe('chokidar-cli', function() {
             }
         })
         .then(function() {
-            var res = fs.readFileSync(resolve(CHANGE_FILE)).toString().trim();
+            var res = readFileSync(resolve(CHANGE_FILE)).toString().trim();
             assert.equal(res, 'change:dir/a.js', 'need event/path detail');
             done();
         });
@@ -189,5 +189,5 @@ function resolve(relativePath) {
 }
 
 function changeFileExists() {
-    return fs.existsSync(resolve(CHANGE_FILE));
+    return existsSync(resolve(CHANGE_FILE));
 }
