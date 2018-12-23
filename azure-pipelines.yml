@@ -27,5 +27,10 @@ steps:
 
 - script: |
     npm install
-    npm test
+    npm run test-and-publish
   displayName: 'npm install and test'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'xUnit'
+    testResultsFiles: 'test_results.xml'

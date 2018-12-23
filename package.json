@@ -45,6 +45,7 @@
     "mocha": "^5.2.0"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "test-and-publish": "mocha --reporter xunit --reporter-options output=test_results.xml"
   }
 }
