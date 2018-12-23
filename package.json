@@ -20,9 +20,9 @@
     "chokidar": "./index.js"
   },
   "homepage": "https://github.com/aoberoi/chokidar-cli",
-  "author": "Kimmo Brunfeldt <kimmobrunfeldt@gmail.com> (http://kimmobrunfeldt.github.io/)",
+  "author": "Ankur Oberoi <aoberoi@gmail.com> (https://aoberoi.me)",
   "contributors": [
-    "Ankur Oberoi <aoberoi@gmail.com> (https://aoberoi.me)"
+    "Kimmo Brunfeldt <kimmobrunfeldt@gmail.com> (http://kimmobrunfeldt.github.io/)"
   ],
   "repository": {
     "type": "git",

@@ -1,25 +1,11 @@
-# Chokidar CLI (temporary fork)
-
-**NOTE:** This package is a temporary (hopefully) fork of [the original](https://github.com/kimmobrunfeldt/chokidar-cli) so that I could use [functionality](https://github.com/kimmobrunfeldt/chokidar-cli/pull/29) that is taking some time to merge. I hope not to maintain this package for long.
+# Chokidar CLI
 
 [![Build Status](https://travis-ci.org/aoberoi/chokidar-cli.svg?branch=master)](https://travis-ci.org/aoberoi/chokidar-cli)
 
 Fast cross-platform command line utility to watch file system changes.
 
-The underlying watch library is [Chokidar](https://github.com/paulmillr/chokidar), which is one of the best watch utilities for Node. Chokidar is battle-tested:
-
-> It is used in
-> [brunch](http://brunch.io),
-> [gulp](https://github.com/gulpjs/gulp/),
-> [karma](http://karma-runner.github.io),
-> [PM2](https://github.com/Unitech/PM2),
-> [browserify](http://browserify.org/),
-> [webpack](http://webpack.github.io/),
-> [BrowserSync](http://www.browsersync.io/),
-> [socketstream](http://www.socketstream.org),
-> [derby](http://derbyjs.com/),
-> and [many others](https://www.npmjs.org/browse/depended/chokidar/).
-> It has proven itself in production environments.
+The underlying watch library is [Chokidar](https://github.com/paulmillr/chokidar), which is one of the best watch
+utilities for Node. Chokidar is battle-tested.
 
 ## Install
 
@@ -47,7 +33,8 @@ add:test/b.js
 unlink:test/b.js
 ```
 
-Each change is represented with format `event:relativepath`. Possible events: `add`, `unlink`, `addDir`, `unlinkDir`, `change`.
+Each change is represented with format `event:relativepath`. Possible events: `add`, `unlink`, `addDir`, `unlinkDir`,
+`change`.
 
 **Output only relative paths on each change**
 
@@ -129,6 +116,9 @@ Examples:
                                             files
 ```
 
-## License
+## Acknowledgements
 
-MIT
+Thanks to [Kimmo Brunfeldt](https://github.com/kimmobrunfeldt) for starting this project and taking it very far. I
+maintained a temporary fork in order to land a feature that wasn't making any progress until December 2018, at which
+point I decided to take the "temporary" label off. This project wouldn't be possible without all the contributors on
+the original project.
