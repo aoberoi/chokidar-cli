@@ -34,7 +34,8 @@ describe('chokidar-cli', function() {
         run('git checkout HEAD dir', {pipe: DEBUG_TESTS, cwd: testDir})
         .then(function() {
             done();
-        });
+        })
+        .catch(done);
     });
 
     it('help should be succesful', function(done) {
@@ -43,7 +44,8 @@ describe('chokidar-cli', function() {
             // exit code 0 means success
             assert.strictEqual(exitCode, 0);
             done();
-        });
+        })
+        .catch(done);
     });
 
     it('version should be successful', function(done) {
@@ -52,7 +54,8 @@ describe('chokidar-cli', function() {
             // exit code 0 means success
             assert.strictEqual(exitCode, 0);
             done();
-        });
+        })
+        .catch(done);
     });
 
     it('**/*.less should detect all less files in dir tree', function(done) {
@@ -81,7 +84,8 @@ describe('chokidar-cli', function() {
             // test if the process died unexpectedly before it
             assert(killed, 'process exited too quickly');
             done();
-        });
+        })
+        .catch(done);
 
         setTimeout(function afterWatchIsReady() {
             writeFileSync(resolve('dir/subdir/c.less'), 'content');
@@ -180,7 +184,8 @@ describe('chokidar-cli', function() {
             var res = readFileSync(resolve(CHANGE_FILE)).toString().trim();
             assert.equal(res, 'change:dir/a.js', 'need event/path detail');
             done();
-        });
+        })
+        .catch(done);
     });
 });
 
