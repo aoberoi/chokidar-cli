@@ -6,7 +6,7 @@ const assert = require('assert');
 const { run } = require('../utils');
 
 // If true, output of commands are shown
-const DEBUG_TESTS = false;
+const DEBUG_TESTS = true;
 
 // Arbitrary file which is created on detected changes
 // Used to determine that file changes were actually detected.
@@ -31,7 +31,7 @@ describe('chokidar-cli', function() {
         }
 
         // Clear all changes in the test directory
-        run('git checkout HEAD dir', {cwd: testDir})
+        run('git checkout HEAD dir', {pipe: DEBUG_TESTS, cwd: testDir})
         .then(function() {
             done();
         });
@@ -66,7 +66,7 @@ describe('chokidar-cli', function() {
         // TODO: touch command does not always create file before assertion
         run('node ../index.js "dir/**/*.less" -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
-            cwd: './test',
+            cwd: testDir,
             // Called after process is spawned
             callback: function(child) {
                 setTimeout(function killChild() {
@@ -99,7 +99,7 @@ describe('chokidar-cli', function() {
 
         run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
-            cwd: './test',
+            cwd: testDir,
             callback: function(child) {
                 setTimeout(function killChild() {
                     // Kill child after test case
@@ -133,7 +133,7 @@ describe('chokidar-cli', function() {
 
         run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
-            cwd: './test',
+            cwd: testDir,
             callback: function(child) {
                 setTimeout(function killChild() {
                     // Kill child after test case
@@ -171,7 +171,7 @@ describe('chokidar-cli', function() {
 
         run('node ../index.js "dir/a.js" -c "' + command + '"', {
             pipe: DEBUG_TESTS,
-            cwd: './test',
+            cwd: testDir,
             callback: function(child) {
                 setTimeout(child.kill.bind(child), TIMEOUT_KILL);
             }
