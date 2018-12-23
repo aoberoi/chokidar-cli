@@ -3,7 +3,7 @@
 const { unlinkSync, writeFileSync, readFileSync, existsSync } = require('fs');
 const { resolve: pathResolve, join: pathJoin } = require('path');
 const assert = require('assert');
-const { run } = require('../utils');
+const { spawn } = require('child_process');
 
 // If true, output of commands are shown
 const DEBUG_TESTS = true;
@@ -68,7 +68,7 @@ describe('chokidar-cli', function() {
             pipe: DEBUG_TESTS,
             cwd: testDir,
             // Called after process is spawned
-            callback: function(child) {
+            onProcessSpawned: function(child) {
                 setTimeout(function killChild() {
                     // Kill child after test case
                     child.kill();
@@ -100,7 +100,7 @@ describe('chokidar-cli', function() {
         run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
             cwd: testDir,
-            callback: function(child) {
+            onProcessSpawned: function(child) {
                 setTimeout(function killChild() {
                     // Kill child after test case
                     child.kill();
@@ -134,7 +134,7 @@ describe('chokidar-cli', function() {
         run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
             cwd: testDir,
-            callback: function(child) {
+            onProcessSpawned: function(child) {
                 setTimeout(function killChild() {
                     // Kill child after test case
                     child.kill();
@@ -172,7 +172,7 @@ describe('chokidar-cli', function() {
         run('node ../index.js "dir/a.js" -c "' + command + '"', {
             pipe: DEBUG_TESTS,
             cwd: testDir,
-            callback: function(child) {
+            onProcessSpawned: function(child) {
                 setTimeout(child.kill.bind(child), TIMEOUT_KILL);
             }
         })
@@ -190,4 +190,28 @@ function resolve(relativePath) {
 
 function changeFileExists() {
     return existsSync(resolve(CHANGE_FILE));
+}
+
+function run(cmd, { cwd, pipe, onProcessSpawned }) {
+    return new Promise((resolve, reject) => {
+        let child;
+        try {
+            child = spawn(cmd, {
+                cwd,
+                stdio: (pipe === undefined || pipe) ? 'inherit' : null,
+                shell: true,
+            });
+        } catch (error) {
+            return Promise.reject(error);
+        }
+
+        function e(error) { child.off('close', c); reject(error); }
+        function c(exitCode) { child.off('error', e); resolve(exitCode); }
+        child.once('error', e);
+        child.once('close', c);
+
+        if (onProcessSpawned) {
+            onProcessSpawned(child);
+        }
+    });
 }
