@@ -1,7 +1,7 @@
 // Test basic usage of cli. Contains confusing setTimeouts
 
 const { unlinkSync, writeFileSync, readFileSync, existsSync } = require('fs');
-var path = require('path');
+const { resolve: pathResolve, join: pathJoin } = require('path');
 var assert = require('assert');
 var utils = require('../utils');
 var run = utils.run;
@@ -19,8 +19,8 @@ var TIMEOUT_CHANGE_DETECTED = 700;
 var TIMEOUT_KILL = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 1000;
 
 // Abs path to test directory
-var testDir = path.resolve(__dirname);
-process.chdir(path.join(testDir, '..'));
+var testDir = pathResolve(__dirname);
+process.chdir(pathJoin(testDir, '..'));
 
 describe('chokidar-cli', function() {
     this.timeout(5000);
@@ -185,7 +185,7 @@ describe('chokidar-cli', function() {
 });
 
 function resolve(relativePath) {
-    return path.join(testDir, relativePath);
+    return pathJoin(testDir, relativePath);
 }
 
 function changeFileExists() {
