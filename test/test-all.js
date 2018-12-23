@@ -109,7 +109,8 @@ describe('chokidar-cli', function() {
         })
         .then(function childProcessExited(exitCode) {
             done();
-        });
+        })
+        .catch(done);
 
         setTimeout(function afterWatchIsReady() {
             fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');
@@ -142,7 +143,8 @@ describe('chokidar-cli', function() {
         })
         .then(function childProcessExited(exitCode) {
             done();
-        });
+        })
+        .catch(done);
 
         setTimeout(function afterWatchIsReady() {
             fs.writeFileSync(resolve('dir/subdir/c.less'), 'content');
