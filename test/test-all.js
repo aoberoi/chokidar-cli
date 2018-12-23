@@ -6,19 +6,19 @@ const assert = require('assert');
 const { run } = require('../utils');
 
 // If true, output of commands are shown
-var DEBUG_TESTS = false;
+const DEBUG_TESTS = false;
 
 // Arbitrary file which is created on detected changes
 // Used to determine that file changes were actually detected.
-var CHANGE_FILE = 'dir/change';
+const CHANGE_FILE = 'dir/change';
 
 // Time to wait for different tasks
-var TIMEOUT_WATCH_READY = 1000;
-var TIMEOUT_CHANGE_DETECTED = 700;
-var TIMEOUT_KILL = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 1000;
+const TIMEOUT_WATCH_READY = 1000;
+const TIMEOUT_CHANGE_DETECTED = 700;
+const TIMEOUT_KILL = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 1000;
 
 // Abs path to test directory
-var testDir = pathResolve(__dirname);
+const testDir = pathResolve(__dirname);
 process.chdir(pathJoin(testDir, '..'));
 
 describe('chokidar-cli', function() {
@@ -92,9 +92,9 @@ describe('chokidar-cli', function() {
     });
 
     it('should throttle invocations of command', function(done) {
-        var touch = 'touch ' + CHANGE_FILE;
-        var changedDetectedTime = 100;
-        var throttleTime = (2 * changedDetectedTime) + 100;
+        const touch = 'touch ' + CHANGE_FILE;
+        const changedDetectedTime = 100;
+        const throttleTime = (2 * changedDetectedTime) + 100;
 
         run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
@@ -125,10 +125,10 @@ describe('chokidar-cli', function() {
     });
 
     it('should debounce invocations of command', function(done) {
-        var touch = 'touch ' + CHANGE_FILE;
-        var changedDetectedTime = 100;
-        var debounceTime = (2 * changedDetectedTime) + 100;
-        var killTime = TIMEOUT_WATCH_READY + (2 * changedDetectedTime) + debounceTime + 1000;
+        const touch = 'touch ' + CHANGE_FILE;
+        const changedDetectedTime = 100;
+        const debounceTime = (2 * changedDetectedTime) + 100;
+        const killTime = TIMEOUT_WATCH_READY + (2 * changedDetectedTime) + debounceTime + 1000;
 
         run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
             pipe: DEBUG_TESTS,
@@ -162,7 +162,7 @@ describe('chokidar-cli', function() {
     });
 
     it('should replace {path} and {event} in command', function(done) {
-        var command = "echo '{event}:{path}' > " + CHANGE_FILE;
+        const command = "echo '{event}:{path}' > " + CHANGE_FILE;
 
         setTimeout(function() {
           writeFileSync(resolve('dir/a.js'), 'content');
