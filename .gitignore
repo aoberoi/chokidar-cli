@@ -1,4 +1,4 @@
 node_modules
 package-lock.json
 test/dir/change
-test_results.xml
+test-results.xml
