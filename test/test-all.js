@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var path = require('path');
-var exec = require('child_process').exec;
 var assert = require('assert');
 var utils = require('../utils');
 var run = utils.run;
