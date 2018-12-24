@@ -58,6 +58,7 @@ describe('chokidar-cli', function () {
             setTimeout(function afterWatchIsReady() {
                 // writeFileSync(lessFile, 'content');
                 writeFileSync(changeFile, 'content');
+                run(touch, 400).catch(done);
 
                 setTimeout(function() {
                     assert(existsSync(changeFile), 'change file should exist');
