@@ -58,6 +58,10 @@ describe('chokidar-cli', function () {
             // TODO: use template literals
             run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun, { shouldInheritStdio: true })
                 .catch((error) => {
+                    if (error.code === 'ENOENT') {
+                        return done();
+                    }
+
                     // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
                     if (!error.reason || error.reason !== REASON_TIMEOUT) {
