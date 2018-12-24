@@ -49,6 +49,7 @@ describe('chokidar-cli', function () {
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
             // Use a file to detect that trigger command is actually run
+            // TODO: could move this to the outermost scope
             const touch = touchCmd + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
@@ -56,6 +57,7 @@ describe('chokidar-cli', function () {
             //     .then(done, done);
             run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun)
                 .catch((error) => {
+                    // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
                     if (!error.reason || error.reason !== REASON_TIMEOUT) {
                         return done(error);
@@ -198,7 +200,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             // with this option turned on, however it turns off nice behavior in *nix platforms, so we conditionally
             // set it here.
             // shell: isWin,
-            shell: false,
+            shell: true,
         });
     } catch (error) {
         return Promise.reject(error);
