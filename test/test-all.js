@@ -21,7 +21,8 @@ const TIMEOUT_WATCH_READY = 1000;
 const TIMEOUT_CHANGE_DETECTED = 700;
 const TIMEOUT_PADDING = 300;
 
-// NOTE: is touch available on Windows?
+const isWin = process.platform === 'win32';
+const touchCmd = isWin ? 'echo.> ' : 'touch ';
 
 describe('chokidar-cli', function () {
 
@@ -48,18 +49,15 @@ describe('chokidar-cli', function () {
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
             // Use a file to detect that trigger command is actually run
-            // const touch = 'touch ' + changeFile;
-            // const touch = 'echo hello';
-            const touch = 'echo.> ' + changeFile;
+            const touch = touchCmd + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
+            run(touch).catch(done);
 
             setTimeout(function afterWatchIsReady() {
-                // writeFileSync(lessFile, 'content');
-                // writeFileSync(changeFile, 'content');
-                run(touch, 400).catch(done);
+                writeFileSync(lessFile, 'content');
 
                 setTimeout(function() {
                     assert(existsSync(changeFile), 'change file should exist');
@@ -174,8 +172,6 @@ function deleteChangeFileSync() {
 
 /** Flag for when a process is killed by the following helper */
 const REASON_TIMEOUT = Symbol('REASON_TIMEOUT');
-
-const isWin = process.platform === 'win32';
 
 /**
  * Run a command. Returns a promise that resolves or rejects when the process finishes. The promise resolves when the
