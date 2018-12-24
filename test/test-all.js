@@ -8,8 +8,10 @@ const spawn = require('npm-run-all/lib/spawn');;
  */
 const testDir = pathResolve(__dirname);
 const packageDir = pathJoin(testDir, '..');
-// Arbitrary file which is created on watched file changes.
+// File which is created on watched file changes, whose existence is used to verify if commands are run.
 const changeFile = pathJoin(testDir, 'dir/change');
+const lessFile = pathJoin(testDir, 'dir/subdir/c.less');
+const jsFile = pathJoin(testDir, 'dir/a.js');
 
 
 /*
@@ -56,7 +58,7 @@ describe('chokidar-cli', function () {
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
-                writeFileSync(resolve('dir/subdir/c.less'), 'content');
+                writeFileSync(lessFile, 'content');
 
                 setTimeout(function() {
                     assert(existsSync(changeFile), 'change file should exist');
@@ -82,11 +84,11 @@ describe('chokidar-cli', function () {
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
-                writeFileSync(resolve('dir/subdir/c.less'), 'content');
+                writeFileSync(lessFile, 'content');
                 setTimeout(function() {
                     assert(existsSync(changeFile), 'change file should exist after first change');
                     deleteChangeFileSync();
-                    writeFileSync(resolve('dir/subdir/c.less'), 'more content');
+                    writeFileSync(lessFile, 'more content');
                     setTimeout(function() {
                         assert.equal(existsSync(changeFile), false, 'change file should not exist after second change');
                     }, TIMEOUT_CHANGE_DETECTED);
@@ -113,10 +115,10 @@ describe('chokidar-cli', function () {
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
-                writeFileSync(resolve('dir/subdir/c.less'), 'content');
+                writeFileSync(lessFile, 'content');
                 setTimeout(function() {
                     assert.equal(existsSync(changeFile), false, 'change file should not exist earlier than debounce time (first)');
-                    writeFileSync(resolve('dir/subdir/c.less'), 'more content');
+                    writeFileSync(lessFile, 'more content');
                     setTimeout(function() {
                         assert.equal(existsSync(changeFile), false, 'change file should not exist earlier than debounce time (second)');
                     }, TIMEOUT_CHANGE_DETECTED);
@@ -139,7 +141,7 @@ describe('chokidar-cli', function () {
                 .then(done, done);
 
             setTimeout(function() {
-                writeFileSync(resolve('dir/a.js'), 'content');
+                writeFileSync(jsFile, 'content');
                 setTimeout(function () {
                     var res = readFileSync(changeFile).toString().trim();
                     assert.equal(res, 'change:dir/a.js', 'need event/path detail');
@@ -160,12 +162,6 @@ describe('chokidar-cli', function () {
 /*
  * Test Helpers
  */
-
-// TODO: we could get rid of this helper if we just resolve the paths to files we care about once before the test runs
-// instead of dynamically during the test
-function resolve(relativePath) {
-    return pathJoin(testDir, relativePath);
-}
 
 /**
  * Cleans up the change file by making sure its removed.
