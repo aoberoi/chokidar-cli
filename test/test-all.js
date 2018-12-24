@@ -35,11 +35,11 @@ describe('chokidar-cli', function () {
         this.timeout(timeToRun + TIMEOUT_PADDING);
 
         it('help should be successful', function () {
-            return run('node index.js --help', timeToRun);
+            return run('node index.js --help', timeToRun, { shouldInheritStdio: true });
         });
 
         it('version should be successful', function () {
-            return run('node index.js -v', timeToRun);
+            return run('node index.js -v', timeToRun, { shouldInheritStdio: true });
         });
     });
 
@@ -58,7 +58,7 @@ describe('chokidar-cli', function () {
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
             // TODO: use template literals
-            run(`node ${indexFile} "${allLessFiles}" -c "` + touch + '"', timeToRun)
+            run(`node ${indexFile} "${allLessFiles}" -c "` + touch + '"', timeToRun, { shouldInheritStdio: true })
                 .catch((error) => {
                     // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
