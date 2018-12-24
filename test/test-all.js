@@ -55,7 +55,13 @@ describe('chokidar-cli', function () {
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
             run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun)
-                .catch(() => done());
+                .catch((error) => {
+                    // only swallow the error if the reason was a timeout
+                    if (!error.reason || error.reason !== REASON_TIMEOUT) {
+                        return done(error);
+                    }
+                    done();
+                });
 
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(lessFile, 'content');
