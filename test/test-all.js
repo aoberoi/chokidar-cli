@@ -13,8 +13,6 @@ const packageDir = pathJoin(testDir, '..');
 // Arbitrary file which is created on watched file changes.
 const changeFile = pathJoin(testDir, 'dir/change');
 
-// TODO: maybe use a Symbol
-const REASON_TIMEOUT = 'TIMEOUT'
 
 // Time to wait for different tasks
 const TIMEOUT_WATCH_READY = 1000;
@@ -51,19 +49,8 @@ describe('chokidar-cli', function () {
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // TODO: touch command does not always create file before assertion
-            run('node ../index.js "dir/**/*.less" -c "' + touch + '"')
-                .then(() => {
-                    // process terminated normally, which is not what is expected in this test;
-                    done(new Error('process terminated too soon'));
-                })
-                .catch((error) => {
-                    // we expect the process to be killed by a timeout
-                    if (error.reason && error.reason === REASON_TIMEOUT) {
-                        return done();
-                    }
-                    // if not, then this was some other error
-                    done(error);
-                });
+            expectKilledByTimeout(run('node ../index.js "dir/**/*.less" -c "' + touch + '"'))
+                .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(resolve('dir/subdir/c.less'), 'content');
@@ -81,19 +68,10 @@ describe('chokidar-cli', function () {
             const changedDetectedTime = 100;
             const throttleTime = (2 * changedDetectedTime) + 100;
 
-            run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"')
-                .then(() => {
-                    // process terminated normally, which is not what is expected in this test;
-                    done(new Error('process terminated too soon'));
-                })
-                .catch((error) => {
-                    // we expect the process to be killed by a timeout
-                    if (error.reason && error.reason === REASON_TIMEOUT) {
-                        return done();
-                    }
-                    // if not, then this was some other error
-                    done(error);
-                });
+            expectKilledByTimeout(
+                run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"')
+            )
+                .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(resolve('dir/subdir/c.less'), 'content');
@@ -116,9 +94,11 @@ describe('chokidar-cli', function () {
             const debounceTime = (2 * changedDetectedTime) + 100;
             const killTime = TIMEOUT_WATCH_READY + (2 * changedDetectedTime) + debounceTime + 1000;
 
-            run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
-                killTimeout: killTime,
-            })
+            expectKilledByTimeout(
+                run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
+                    killTimeout: killTime,
+                })
+            )
                 .then(() => {
                     // process terminated normally, which is not what is expected in this test;
                     done(new Error('process terminated too soon'));
@@ -156,21 +136,13 @@ describe('chokidar-cli', function () {
                 writeFileSync(resolve('dir/a.js'), 'content');
             }, TIMEOUT_WATCH_READY);
 
-            run('node ../index.js "dir/a.js" -c "' + command + '"')
+            expectKilledByTimeout(run('node ../index.js "dir/a.js" -c "' + command + '"'))
                 .then(() => {
-                    // process terminated normally, which is not what is expected in this test;
-                    done(new Error('process terminated too soon'));
+                    var res = readFileSync(changeFile).toString().trim();
+                    assert.equal(res, 'change:dir/a.js', 'need event/path detail');
+                    done();
                 })
-                .catch((error) => {
-                    // we expect the process to be killed by a timeout
-                    if (error.reason && error.reason === REASON_TIMEOUT) {
-                        var res = readFileSync(changeFile).toString().trim();
-                        assert.equal(res, 'change:dir/a.js', 'need event/path detail');
-                        return done();
-                    }
-                    // if not, then this was some other error
-                    done(error);
-                });
+                .catch(done);
         });
 
         afterEach(function () {
@@ -193,6 +165,9 @@ function resolve(relativePath) {
     return pathJoin(testDir, relativePath);
 }
 
+/**
+ * Cleans up the change file by making sure its removed.
+ */
 function deleteChangeFileSync() {
     try {
         unlinkSync(changeFile);
@@ -208,6 +183,10 @@ function changeFileExists() {
     return existsSync(changeFile);
 }
 
+
+/** Flag for when a process is killed by the following helper */
+const REASON_TIMEOUT = Symbol('REASON_TIMEOUT');
+
 /**
  * Run a command. Returns a promise that resolves or rejects when the process finishes. The promise resolves when the
  * process finishes normally, and rejects when the process finishes abnormally (like being killed after a timeout).
@@ -217,6 +196,7 @@ function changeFileExists() {
  * which is useful for debugging but may cause zombie processes to stick around, defaults to false.
  * @param {number} options.killTimeout - number of milliseconds to wait for the command to exit before killing it and
  * its children processes, defaults to TIMEOUT_KILL.
+ * @returns {Promise}
  */
 function run(cmd, { cwd = testDir, shouldInheritStdio = false, killTimeout = TIMEOUT_KILL } = {}) {
     let child;
@@ -256,4 +236,25 @@ function run(cmd, { cwd = testDir, shouldInheritStdio = false, killTimeout = TIM
             child.kill();
         }, killTimeout);
     });
+}
+
+/**
+ * Enforces that the input promise, which comes from the output of run() above, rejects because of a timeout and for
+ * no other reason.
+ * @param {Promise} runPromise - input promise
+ * @returns {Promise} a promise that resolves when the input promise rejected because of a timeout, rejects otherwise
+ */
+function expectKilledByTimeout(runPromise) {
+    return runPromise.then(
+        () => {
+            // process terminated normally, which is not what is expected in this test;
+            throw new Error('process terminated too soon');
+        },
+        (error) => {
+            // only swallow the error if the reason was a timeout
+            if (!error.reason || error.reason !== REASON_TIMEOUT) {
+                throw error;
+            }
+        }
+    );
 }
