@@ -49,7 +49,8 @@ describe('chokidar-cli', function () {
 
             // Use a file to detect that trigger command is actually run
             // const touch = 'touch ' + changeFile;
-            const touch = 'echo hello';
+            // const touch = 'echo hello';
+            const touch = 'echo.> ' + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
@@ -57,7 +58,7 @@ describe('chokidar-cli', function () {
 
             setTimeout(function afterWatchIsReady() {
                 // writeFileSync(lessFile, 'content');
-                writeFileSync(changeFile, 'content');
+                // writeFileSync(changeFile, 'content');
                 run(touch, 400).catch(done);
 
                 setTimeout(function() {
