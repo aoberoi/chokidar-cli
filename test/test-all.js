@@ -38,6 +38,8 @@ describe('chokidar-cli', function () {
         });
     });
 
+    // TODO: When a failure happens by an assert throwing, the child process will outlive this test case, and
+    // potentially cause havoc in future test cases.
     describe('subcommands that use the file system', function () {
         it('**/*.less should detect all less files in dir tree', function (done) {
             const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 100;
@@ -63,11 +65,12 @@ describe('chokidar-cli', function () {
         });
 
         it('should throttle invocations of command', function (done) {
+            // when two writes to a watched file happen within the throttleTime period, only the first one triggers
+            // running the command
+
             const timeToRun = TIMEOUT_WATCH_READY + (2 * TIMEOUT_CHANGE_DETECTED) + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
-            // when two writes to a watched file happen within the throttleTime period, only the first one triggers
-            // running the command
             const touch = 'touch ' + changeFile;
             const throttleTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
@@ -92,13 +95,15 @@ describe('chokidar-cli', function () {
         });
 
         it('should debounce invocations of command', function (done) {
-            const timeToRun = TIMEOUT_WATCH_READY + (2 * TIMEOUT_CHANGE_DETECTED) + 200 + 100;
-            this.timeout(timeToRun + TIMEOUT_PADDING);
-
             // when two writes to a watched file happen within the debounceTime period, the command should be run
             // after the debounce time has elapsed (and not before it has elapsed).
+
+            const debouncePadding = 1000;
+            const debounceTime = (2 * TIMEOUT_CHANGE_DETECTED);
+            const timeToRun = TIMEOUT_WATCH_READY + debounceTime + debouncePadding + 100;
+            this.timeout(timeToRun + TIMEOUT_PADDING);
+
             const touch = 'touch ' + changeFile;
-            const debounceTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
             expectKilledByTimeout(
                 run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
@@ -115,10 +120,10 @@ describe('chokidar-cli', function () {
                     setTimeout(function() {
                         assert.equal(changeFileExists(), false, 'change file should not exist earlier than debounce time (second)');
                     }, TIMEOUT_CHANGE_DETECTED);
-                    setTimeout(function() {
-                        assert(changeFileExists(), 'change file should exist after debounce time');
-                    }, debounceTime - TIMEOUT_CHANGE_DETECTED + 100);
                 }, TIMEOUT_CHANGE_DETECTED);
+                setTimeout(function() {
+                    assert(changeFileExists(), 'change file should exist after debounce time');
+                }, debounceTime + debouncePadding);
             }, TIMEOUT_WATCH_READY);
         });
 
