@@ -198,7 +198,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             // with this option turned on, however it turns off nice behavior in *nix platforms, so we conditionally
             // set it here.
             // shell: isWin,
-            shell: true,
+            shell: false,
         });
     } catch (error) {
         return Promise.reject(error);
