@@ -26,7 +26,7 @@ const touchCmd = isWin ? 'echo.> ' : 'touch ';
 
 describe('chokidar-cli', function () {
 
-    describe.only('informational subcommands', function () {
+    describe('informational subcommands', function () {
         // Giving the informational subcommands a shorter timeout than the default since they should finish
         // relatively quickly (this cannot be done in a beforeEach hook because the timeout would apply to the hook).
         const timeToRun = 1000;
