@@ -3,8 +3,6 @@ const { resolve: pathResolve, join: pathJoin } = require('path');
 const assert = require('assert');
 const spawn = require('npm-run-all/lib/spawn');;
 
-const isWin = process.platform === 'win32';
-
 /*
  * Paths used in tests (each of them are absolute)
  */
@@ -14,10 +12,12 @@ const packageDir = pathJoin(testDir, '..');
 const changeFile = pathJoin(testDir, 'dir/change');
 
 
-// Time to wait for different tasks
+/*
+ * Timeouts used throughout the tests (each of them in milliseconds)
+ */
 const TIMEOUT_WATCH_READY = 1000;
 const TIMEOUT_CHANGE_DETECTED = 700;
-const TIMEOUT_KILL = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 1000;
+const TIMEOUT_PADDING = 300;
 
 // NOTE: is touch available on Windows?
 
@@ -26,30 +26,31 @@ describe('chokidar-cli', function () {
     describe('informational subcommands', function () {
         // Giving the informational subcommands a shorter timeout than the default since they should finish
         // relatively quickly (this cannot be done in a beforeEach hook because the timeout would apply to the hook).
-        this.killTimeout = 1000;
-        this.timeout(this.killTimeout + 200);
+        const killTimeout = 1000;
+        this.timeout(killTimeout + 200);
 
         it('help should be successful', function () {
-            return run('node index.js --help', { cwd: packageDir, killTimeout: this.killTimeout });
+            return run('node index.js --help', { cwd: packageDir, killTimeout });
         });
 
         it('version should be successful', function () {
-            return run('node index.js -v', { cwd: packageDir, killTimeout: this.killTimeout });
+            return run('node index.js -v', { cwd: packageDir, killTimeout });
         });
     });
 
     describe('subcommands that use the file system', function () {
-        // Giving each test a timeout that is long enough to deal with processes being killed on timeout (this cannot
-        // be done in a beforeEach hook because the timeout would apply to the hook).
-        this.timeout(TIMEOUT_KILL * 2);
-
         it('**/*.less should detect all less files in dir tree', function (done) {
+            const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 100;
+            this.timeout(timeToRun + TIMEOUT_PADDING);
+
             // Use a file to detect that trigger command is actually run
             const touch = 'touch ' + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // TODO: touch command does not always create file before assertion
-            expectKilledByTimeout(run('node ../index.js "dir/**/*.less" -c "' + touch + '"'))
+            expectKilledByTimeout(run('node ../index.js "dir/**/*.less" -c "' + touch + '"', {
+                killTimeout: timeToRun,
+            }))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -62,14 +63,18 @@ describe('chokidar-cli', function () {
         });
 
         it('should throttle invocations of command', function (done) {
+            const timeToRun = TIMEOUT_WATCH_READY + (2 * TIMEOUT_CHANGE_DETECTED) + 100;
+            this.timeout(timeToRun + TIMEOUT_PADDING);
+
             // when two writes to a watched file happen within the throttleTime period, only the first one triggers
             // running the command
             const touch = 'touch ' + changeFile;
-            const changedDetectedTime = 100;
-            const throttleTime = (2 * changedDetectedTime) + 100;
+            const throttleTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
             expectKilledByTimeout(
-                run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"')
+                run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
+                    killTimeout: timeToRun,
+                })
             )
                 .then(done, done);
 
@@ -81,36 +86,26 @@ describe('chokidar-cli', function () {
                     writeFileSync(resolve('dir/subdir/c.less'), 'more content');
                     setTimeout(function() {
                         assert.equal(changeFileExists(), false, 'change file should not exist after second change');
-                    }, changedDetectedTime);
-                }, changedDetectedTime);
+                    }, TIMEOUT_CHANGE_DETECTED);
+                }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
         });
 
         it('should debounce invocations of command', function (done) {
+            const timeToRun = TIMEOUT_WATCH_READY + (2 * TIMEOUT_CHANGE_DETECTED) + 200 + 100;
+            this.timeout(timeToRun + TIMEOUT_PADDING);
+
             // when two writes to a watched file happen within the debounceTime period, the command should be run
             // after the debounce time has elapsed (and not before it has elapsed).
             const touch = 'touch ' + changeFile;
-            const changedDetectedTime = 100;
-            const debounceTime = (2 * changedDetectedTime) + 100;
-            const killTime = TIMEOUT_WATCH_READY + (2 * changedDetectedTime) + debounceTime + 1000;
+            const debounceTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
             expectKilledByTimeout(
                 run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
-                    killTimeout: killTime,
+                    killTimeout: timeToRun,
                 })
             )
-                .then(() => {
-                    // process terminated normally, which is not what is expected in this test;
-                    done(new Error('process terminated too soon'));
-                })
-                .catch((error) => {
-                    // we expect the process to be killed by a timeout
-                    if (error.reason && error.reason === REASON_TIMEOUT) {
-                        return done();
-                    }
-                    // if not, then this was some other error
-                    done(error);
-                });
+                .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(resolve('dir/subdir/c.less'), 'content');
@@ -119,30 +114,32 @@ describe('chokidar-cli', function () {
                     writeFileSync(resolve('dir/subdir/c.less'), 'more content');
                     setTimeout(function() {
                         assert.equal(changeFileExists(), false, 'change file should not exist earlier than debounce time (second)');
-                    }, changedDetectedTime);
+                    }, TIMEOUT_CHANGE_DETECTED);
                     setTimeout(function() {
                         assert(changeFileExists(), 'change file should exist after debounce time');
-                    }, debounceTime + changedDetectedTime);
-                }, changedDetectedTime);
+                    }, debounceTime - TIMEOUT_CHANGE_DETECTED + 100);
+                }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
-
         });
 
         it('should replace {path} and {event} in command', function (done) {
+            const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 200;
+            this.timeout(timeToRun + TIMEOUT_PADDING);
+
             const command = "echo '{event}:{path}' > " + changeFile;
 
-            setTimeout(function() {
-                // trigger a change event
-                writeFileSync(resolve('dir/a.js'), 'content');
-            }, TIMEOUT_WATCH_READY);
+            expectKilledByTimeout(run('node ../index.js "dir/a.js" -c "' + command + '"', {
+                killTimeout: timeToRun,
+            }))
+                .then(done, done);
 
-            expectKilledByTimeout(run('node ../index.js "dir/a.js" -c "' + command + '"'))
-                .then(() => {
+            setTimeout(function() {
+                writeFileSync(resolve('dir/a.js'), 'content');
+                setTimeout(function () {
                     var res = readFileSync(changeFile).toString().trim();
                     assert.equal(res, 'change:dir/a.js', 'need event/path detail');
-                    done();
-                })
-                .catch(done);
+                }, TIMEOUT_CHANGE_DETECTED);
+            }, TIMEOUT_WATCH_READY);
         });
 
         afterEach(function () {
@@ -187,6 +184,8 @@ function changeFileExists() {
 /** Flag for when a process is killed by the following helper */
 const REASON_TIMEOUT = Symbol('REASON_TIMEOUT');
 
+const isWin = process.platform === 'win32';
+
 /**
  * Run a command. Returns a promise that resolves or rejects when the process finishes. The promise resolves when the
  * process finishes normally, and rejects when the process finishes abnormally (like being killed after a timeout).
@@ -195,10 +194,10 @@ const REASON_TIMEOUT = Symbol('REASON_TIMEOUT');
  * @param {boolean} options.shouldInheritStdio - when set to true, the stdio will be piped to this processes stdio
  * which is useful for debugging but may cause zombie processes to stick around, defaults to false.
  * @param {number} options.killTimeout - number of milliseconds to wait for the command to exit before killing it and
- * its children processes, defaults to TIMEOUT_KILL.
+ * its children processes, defaults to 0.
  * @returns {Promise}
  */
-function run(cmd, { cwd = testDir, shouldInheritStdio = false, killTimeout = TIMEOUT_KILL } = {}) {
+function run(cmd, { cwd = testDir, shouldInheritStdio = false, killTimeout = 0 } = {}) {
     let child;
     try {
         child = spawn(cmd, {
