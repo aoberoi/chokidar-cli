@@ -54,7 +54,7 @@ describe('chokidar-cli', function () {
             // No quotes needed in glob pattern because node process spawn does no globbing
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
-            run(touch).catch(done);
+            run(touch).then(done, done);
 
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(lessFile, 'content');
