@@ -56,10 +56,11 @@ describe('chokidar-cli', function () {
             //     .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
-                writeFileSync(lessFile, 'content');
+                // writeFileSync(lessFile, 'content');
+                writeFileSync(changeFile, 'content');
 
                 setTimeout(function() {
-                    // assert(existsSync(changeFile), 'change file should exist');
+                    assert(existsSync(changeFile), 'change file should exist');
                     done();
                 }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
@@ -144,7 +145,7 @@ describe('chokidar-cli', function () {
         });
 
         afterEach(function () {
-            // deleteChangeFileSync()
+            deleteChangeFileSync()
             // TODO: should we depend on every system this runs in to have git?
             // return run('git checkout HEAD test/dir', 1000);
         });
