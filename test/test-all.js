@@ -59,7 +59,7 @@ describe('chokidar-cli', function () {
                 writeFileSync(resolve('dir/subdir/c.less'), 'content');
 
                 setTimeout(function() {
-                    assert(changeFileExists(), 'change file should exist');
+                    assert(existsSync(changeFile), 'change file should exist');
                 }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
         });
@@ -84,11 +84,11 @@ describe('chokidar-cli', function () {
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(resolve('dir/subdir/c.less'), 'content');
                 setTimeout(function() {
-                    assert(changeFileExists(), 'change file should exist after first change');
+                    assert(existsSync(changeFile), 'change file should exist after first change');
                     deleteChangeFileSync();
                     writeFileSync(resolve('dir/subdir/c.less'), 'more content');
                     setTimeout(function() {
-                        assert.equal(changeFileExists(), false, 'change file should not exist after second change');
+                        assert.equal(existsSync(changeFile), false, 'change file should not exist after second change');
                     }, TIMEOUT_CHANGE_DETECTED);
                 }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
@@ -115,14 +115,14 @@ describe('chokidar-cli', function () {
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(resolve('dir/subdir/c.less'), 'content');
                 setTimeout(function() {
-                    assert.equal(changeFileExists(), false, 'change file should not exist earlier than debounce time (first)');
+                    assert.equal(existsSync(changeFile), false, 'change file should not exist earlier than debounce time (first)');
                     writeFileSync(resolve('dir/subdir/c.less'), 'more content');
                     setTimeout(function() {
-                        assert.equal(changeFileExists(), false, 'change file should not exist earlier than debounce time (second)');
+                        assert.equal(existsSync(changeFile), false, 'change file should not exist earlier than debounce time (second)');
                     }, TIMEOUT_CHANGE_DETECTED);
                 }, TIMEOUT_CHANGE_DETECTED);
                 setTimeout(function() {
-                    assert(changeFileExists(), 'change file should exist after debounce time');
+                    assert(existsSync(changeFile), 'change file should exist after debounce time');
                 }, debounceTime + debouncePadding);
             }, TIMEOUT_WATCH_READY);
         });
@@ -180,11 +180,6 @@ function deleteChangeFileSync() {
         }
     }
 }
-
-function changeFileExists() {
-    return existsSync(changeFile);
-}
-
 
 /** Flag for when a process is killed by the following helper */
 const REASON_TIMEOUT = Symbol('REASON_TIMEOUT');
