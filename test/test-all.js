@@ -32,11 +32,11 @@ describe('chokidar-cli', function () {
         this.timeout(killTimeout + 200);
 
         it('help should be successful', function () {
-            return run('node index.js --help', { cwd: packageDir, killTimeout });
+            return run('node index.js --help', { killTimeout });
         });
 
         it('version should be successful', function () {
-            return run('node index.js -v', { cwd: packageDir, killTimeout });
+            return run('node index.js -v', { killTimeout });
         });
     });
 
@@ -52,7 +52,7 @@ describe('chokidar-cli', function () {
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // TODO: touch command does not always create file before assertion
-            expectKilledByTimeout(run('node ../index.js "dir/**/*.less" -c "' + touch + '"', {
+            expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', {
                 killTimeout: timeToRun,
             }))
                 .then(done, done);
@@ -77,7 +77,7 @@ describe('chokidar-cli', function () {
             const throttleTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
             expectKilledByTimeout(
-                run('node ../index.js "dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
+                run('node index.js "test/dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
                     killTimeout: timeToRun,
                 })
             )
@@ -108,7 +108,7 @@ describe('chokidar-cli', function () {
             const touch = 'touch ' + changeFile;
 
             expectKilledByTimeout(
-                run('node ../index.js "dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
+                run('node index.js "test/dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
                     killTimeout: timeToRun,
                 })
             )
@@ -135,7 +135,7 @@ describe('chokidar-cli', function () {
 
             const command = "echo '{event}:{path}' > " + changeFile;
 
-            expectKilledByTimeout(run('node ../index.js "dir/a.js" -c "' + command + '"', {
+            expectKilledByTimeout(run('node index.js "test/dir/a.js" -c "' + command + '"', {
                 killTimeout: timeToRun,
             }))
                 .then(done, done);
@@ -144,7 +144,7 @@ describe('chokidar-cli', function () {
                 writeFileSync(jsFile, 'content');
                 setTimeout(function () {
                     var res = readFileSync(changeFile).toString().trim();
-                    assert.equal(res, 'change:dir/a.js', 'need event/path detail');
+                    assert.equal(res, 'change:test/dir/a.js', 'need event/path detail');
                 }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
         });
@@ -154,7 +154,7 @@ describe('chokidar-cli', function () {
             // NOTE: it seems like this doesn't always get run at the end of a test, because we're sometimes left with
             // a dirty working copy (test/dir/a.js has content in it when it should be blank)
             // TODO: should we depend on every system this runs in to have git?
-            return run('git checkout HEAD dir');
+            return run('git checkout HEAD test/dir');
         });
     });
 });
@@ -186,18 +186,16 @@ const isWin = process.platform === 'win32';
  * Run a command. Returns a promise that resolves or rejects when the process finishes. The promise resolves when the
  * process finishes normally, and rejects when the process finishes abnormally (like being killed after a timeout).
  * @param {string} cmd - the command to run
- * @param {string} options.cwd - the current working directory for the command, defaults to testDir
  * @param {boolean} options.shouldInheritStdio - when set to true, the stdio will be piped to this processes stdio
  * which is useful for debugging but may cause zombie processes to stick around, defaults to false.
  * @param {number} options.killTimeout - number of milliseconds to wait for the command to exit before killing it and
  * its children processes, defaults to 0.
  * @returns {Promise}
  */
-function run(cmd, { cwd = testDir, shouldInheritStdio = false, killTimeout = 0 } = {}) {
+function run(cmd, { shouldInheritStdio = false, killTimeout = 0 } = {}) {
     let child;
     try {
         child = spawn(cmd, {
-            cwd,
             stdio: shouldInheritStdio ? 'inherit' : null,
             // the cross-spawn package in the implementation of this call will give us some nice behavior in Windows
             // with this option turned on, however it turns off nice behavior in *nix platforms, so we conditionally
