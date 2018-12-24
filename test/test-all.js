@@ -11,6 +11,7 @@ const packageDir = pathJoin(testDir, '..');
 const indexFile = pathJoin(packageDir, 'index.js');
 // File which is created on watched file changes, whose existence is used to verify if commands are run.
 const changeFile = pathJoin(testDir, 'dir/change');
+const allLessFiles = pathJoin(testDir, 'dir/**/*.less');
 const lessFile = pathJoin(testDir, 'dir/subdir/c.less');
 const jsFile = pathJoin(testDir, 'dir/a.js');
 
@@ -57,7 +58,7 @@ describe('chokidar-cli', function () {
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
             // TODO: use template literals
-            run(`node ${indexFile} "test/dir/**/*.less" -c "` + touch + '"', timeToRun)
+            run(`node ${indexFile} "${allLessFiles}" -c "` + touch + '"', timeToRun)
                 .catch((error) => {
                     // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
