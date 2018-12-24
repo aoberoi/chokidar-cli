@@ -48,7 +48,8 @@ describe('chokidar-cli', function () {
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
             // Use a file to detect that trigger command is actually run
-            const touch = 'touch ' + changeFile;
+            // const touch = 'touch ' + changeFile;
+            const touch = 'echo hello';
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
@@ -142,7 +143,7 @@ describe('chokidar-cli', function () {
         });
 
         afterEach(function () {
-            deleteChangeFileSync()
+            // deleteChangeFileSync()
             // TODO: should we depend on every system this runs in to have git?
             // return run('git checkout HEAD test/dir', 1000);
         });
