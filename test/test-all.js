@@ -8,10 +8,9 @@ const spawn = require('npm-run-all/lib/spawn');;
  */
 const testDir = pathResolve(__dirname);
 const packageDir = pathJoin(testDir, '..');
-const indexFile = pathJoin(packageDir, 'index.js');
 // File which is created on watched file changes, whose existence is used to verify if commands are run.
 const changeFile = pathJoin(testDir, 'dir/change');
-const allLessFiles = pathJoin(testDir, 'dir/**/*.less');
+// const allLessFiles = pathJoin(testDir, 'dir/**/*.less');
 const lessFile = pathJoin(testDir, 'dir/subdir/c.less');
 const jsFile = pathJoin(testDir, 'dir/a.js');
 
@@ -58,7 +57,7 @@ describe('chokidar-cli', function () {
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
             // TODO: use template literals
-            run(`node ${indexFile} "${allLessFiles}" -c "` + touch + '"', timeToRun, { shouldInheritStdio: true })
+            run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun, { shouldInheritStdio: true })
                 .catch((error) => {
                     // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
