@@ -219,9 +219,9 @@ function run(cmd, { cwd = testDir, shouldInheritStdio = false, killTimeout = 0 }
     }
 
     return new Promise((resolve, reject) => {
-        function e(error) { child.off('close', c); reject(error); }
+        function e(error) { child.removeListener('close', c); reject(error); }
         function c(exitCode, signal) {
-            child.off('error', e);
+            child.removeListener('error', e);
             if (exitCode === 0 && !signal) {
                 return resolve();
             }
