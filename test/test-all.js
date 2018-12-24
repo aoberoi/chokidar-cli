@@ -59,6 +59,7 @@ describe('chokidar-cli', function () {
             run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun, { shouldInheritStdio: true })
                 .catch((error) => {
                     if (error.code === 'ENOENT') {
+                        console.log(JSON.stringify(error));
                         return done();
                     }
 
