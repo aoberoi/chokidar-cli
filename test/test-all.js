@@ -40,8 +40,8 @@ describe('chokidar-cli', function () {
         });
     });
 
-    // TODO: When a failure happens by an assert throwing, the child process will outlive this test case, and
-    // potentially cause havoc in future test cases.
+    // TODO: When a failure happens by an assert throwing (not calling done), the child process will outlive the test
+    // case, and potentially cause havoc in future test cases. Asserting inside setTimeout()s are probably a bad idea.
     describe('subcommands that use the file system', function () {
         it('**/*.less should detect all less files in dir tree', function (done) {
             const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 100;
@@ -51,7 +51,6 @@ describe('chokidar-cli', function () {
             const touch = 'touch ' + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
-            // TODO: touch command does not always create file before assertion
             expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
                 .then(done, done);
 
@@ -144,8 +143,6 @@ describe('chokidar-cli', function () {
 
         afterEach(function () {
             deleteChangeFileSync()
-            // NOTE: it seems like this doesn't always get run at the end of a test, because we're sometimes left with
-            // a dirty working copy (test/dir/a.js has content in it when it should be blank)
             // TODO: should we depend on every system this runs in to have git?
             return run('git checkout HEAD test/dir', 1000);
         });
