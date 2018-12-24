@@ -43,7 +43,7 @@ describe('chokidar-cli', function () {
     // TODO: When a failure happens by an assert throwing (not calling done), the child process will outlive the test
     // case, and potentially cause havoc in future test cases. Asserting inside setTimeout()s are probably a bad idea.
     describe('subcommands that use the file system', function () {
-        it('**/*.less should detect all less files in dir tree', function (done) {
+        it.only('**/*.less should detect all less files in dir tree', function (done) {
             const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
