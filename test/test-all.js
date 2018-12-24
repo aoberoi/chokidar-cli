@@ -146,7 +146,7 @@ describe('chokidar-cli', function () {
         afterEach(function () {
             deleteChangeFileSync()
             // TODO: should we depend on every system this runs in to have git?
-            // return run('git checkout HEAD test/dir', 1000);
+            return run('git checkout HEAD test/dir', 1000);
         });
     });
 });
