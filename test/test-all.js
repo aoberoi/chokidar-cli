@@ -28,15 +28,15 @@ describe('chokidar-cli', function () {
     describe('informational subcommands', function () {
         // Giving the informational subcommands a shorter timeout than the default since they should finish
         // relatively quickly (this cannot be done in a beforeEach hook because the timeout would apply to the hook).
-        const killTimeout = 1000;
-        this.timeout(killTimeout + 200);
+        const timeToRun = 1000;
+        this.timeout(timeToRun + TIMEOUT_PADDING);
 
         it('help should be successful', function () {
-            return run('node index.js --help', { killTimeout });
+            return run('node index.js --help', timeToRun);
         });
 
         it('version should be successful', function () {
-            return run('node index.js -v', { killTimeout });
+            return run('node index.js -v', timeToRun);
         });
     });
 
@@ -52,9 +52,7 @@ describe('chokidar-cli', function () {
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // TODO: touch command does not always create file before assertion
-            expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', {
-                killTimeout: timeToRun,
-            }))
+            expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -76,11 +74,10 @@ describe('chokidar-cli', function () {
             const touch = 'touch ' + changeFile;
             const throttleTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
-            expectKilledByTimeout(
-                run('node index.js "test/dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"', {
-                    killTimeout: timeToRun,
-                })
-            )
+            expectKilledByTimeout(run(
+                'node index.js "test/dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"',
+                timeToRun,
+            ))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -108,9 +105,7 @@ describe('chokidar-cli', function () {
             const touch = 'touch ' + changeFile;
 
             expectKilledByTimeout(
-                run('node index.js "test/dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', {
-                    killTimeout: timeToRun,
-                })
+                run('node index.js "test/dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', timeToRun)
             )
                 .then(done, done);
 
@@ -135,9 +130,7 @@ describe('chokidar-cli', function () {
 
             const command = "echo '{event}:{path}' > " + changeFile;
 
-            expectKilledByTimeout(run('node index.js "test/dir/a.js" -c "' + command + '"', {
-                killTimeout: timeToRun,
-            }))
+            expectKilledByTimeout(run('node index.js "test/dir/a.js" -c "' + command + '"', timeToRun))
                 .then(done, done);
 
             setTimeout(function() {
@@ -154,7 +147,7 @@ describe('chokidar-cli', function () {
             // NOTE: it seems like this doesn't always get run at the end of a test, because we're sometimes left with
             // a dirty working copy (test/dir/a.js has content in it when it should be blank)
             // TODO: should we depend on every system this runs in to have git?
-            return run('git checkout HEAD test/dir');
+            return run('git checkout HEAD test/dir', 1000);
         });
     });
 });
@@ -186,13 +179,13 @@ const isWin = process.platform === 'win32';
  * Run a command. Returns a promise that resolves or rejects when the process finishes. The promise resolves when the
  * process finishes normally, and rejects when the process finishes abnormally (like being killed after a timeout).
  * @param {string} cmd - the command to run
+ * @param {number} killTimeout - number of milliseconds to wait for the command to exit before killing it and
+ * its children processes, defaults to 0.
  * @param {boolean} options.shouldInheritStdio - when set to true, the stdio will be piped to this processes stdio
  * which is useful for debugging but may cause zombie processes to stick around, defaults to false.
- * @param {number} options.killTimeout - number of milliseconds to wait for the command to exit before killing it and
- * its children processes, defaults to 0.
  * @returns {Promise}
  */
-function run(cmd, { shouldInheritStdio = false, killTimeout = 0 } = {}) {
+function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
     let child;
     try {
         child = spawn(cmd, {
