@@ -8,6 +8,7 @@ const spawn = require('npm-run-all/lib/spawn');;
  */
 const testDir = pathResolve(__dirname);
 const packageDir = pathJoin(testDir, '..');
+const indexFile = pathJoin(packageDir, 'index.js');
 // File which is created on watched file changes, whose existence is used to verify if commands are run.
 const changeFile = pathJoin(testDir, 'dir/change');
 const lessFile = pathJoin(testDir, 'dir/subdir/c.less');
@@ -55,7 +56,8 @@ describe('chokidar-cli', function () {
             // No quotes needed in glob pattern because node process spawn does no globbing
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
-            run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun)
+            // TODO: use template literals
+            run(`node ${indexFile} "test/dir/**/*.less" -c "` + touch + '"', timeToRun)
                 .catch((error) => {
                     // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
