@@ -10,7 +10,6 @@ const testDir = pathResolve(__dirname);
 const packageDir = pathJoin(testDir, '..');
 // File which is created on watched file changes, whose existence is used to verify if commands are run.
 const changeFile = pathJoin(testDir, 'dir/change');
-// const allLessFiles = pathJoin(testDir, 'dir/**/*.less');
 const lessFile = pathJoin(testDir, 'dir/subdir/c.less');
 const jsFile = pathJoin(testDir, 'dir/a.js');
 
@@ -51,7 +50,8 @@ describe('chokidar-cli', function () {
 
             // Use a file to detect that trigger command is actually run
             // TODO: could move this to the outermost scope
-            const touch = touchCmd + changeFile;
+            // const touch = touchCmd + changeFile;
+            const touch = 'echo HELLO';
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
