@@ -22,7 +22,7 @@ const TIMEOUT_CHANGE_DETECTED = 700;
 const TIMEOUT_PADDING = 300;
 
 const isWin = process.platform === 'win32';
-const touchCmd = isWin ? 'copy NUL ' : 'touch ';
+const touch = isWin ? `copy NUL ${changeFile}` : `touch ${changeFile}`;
 
 describe('chokidar-cli', function () {
 
@@ -47,10 +47,6 @@ describe('chokidar-cli', function () {
         it('**/*.less should detect all less files in dir tree', function (done) {
             const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
-
-            // Use a file to detect that trigger command is actually run
-            // TODO: could move this to the outermost scope
-            const touch = touchCmd + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
             expectKilledByTimeout(hideWindowsENOTENT(run(`node index.js "test/dir/**/*.less" -c "${touch}"`, timeToRun)))
