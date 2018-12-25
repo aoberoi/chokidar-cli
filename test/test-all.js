@@ -213,7 +213,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
     }
 
     return new Promise((resolve, reject) => {
-        function e(error) { child.removeListener('close', c); reject(error); }
+        function e(error) { child.removeListener('exit', c); reject(error); }
         function c(exitCode, signal) {
             child.removeListener('error', e);
             console.log(`process ending. exitCode: ${exitCode} signal: ${signal}`);
@@ -226,10 +226,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             reject(error);
         }
         child.once('error', e);
-        // within the child process lifecycle, the close event happens *after* the exit event and also gets the
-        // exit code of the process.
-        // TODO: figure out if inherited (or not) stdio streams make the previous statement untrue.
-        child.once('close', c);
+        child.once('exit', c);
 
         setTimeout(() => {
             child._killedFromTimeout = true;
