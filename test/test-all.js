@@ -216,6 +216,8 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
         function e(error) { child.removeListener('close', c); reject(error); }
         function c(exitCode, signal) {
             child.removeListener('error', e);
+            console.log(`process ending. exitCode: ${exitCode} signal: ${signal}`);
+
             if (exitCode === 0 && !signal) {
                 return resolve();
             }
