@@ -53,17 +53,8 @@ describe('chokidar-cli', function () {
             const touch = touchCmd + changeFile;
 
             // No quotes needed in glob pattern because node process spawn does no globbing
-            // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
-            //     .then(done, done);
-            // TODO: use template literals
-            hideWindowsENOTENT(run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun))
-                .catch((error) => {
-                    // only swallow the error if the reason was a timeout
-                    if (!error.reason || error.reason !== REASON_TIMEOUT) {
-                        return done(error);
-                    }
-                    done();
-                });
+            expectKilledByTimeout(hideWindowsENOTENT(run(`node index.js "test/dir/**/*.less" -c "${touch}"`, timeToRun)))
+                .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
                 writeFileSync(lessFile, 'content');
