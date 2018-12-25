@@ -21,7 +21,8 @@ const TIMEOUT_WATCH_READY = 1000;
 const TIMEOUT_CHANGE_DETECTED = 700;
 const TIMEOUT_PADDING = 300;
 
-// NOTE: is touch available on Windows?
+const isWin = process.platform === 'win32';
+const touch = isWin ? `copy NUL ${changeFile}` : `touch ${changeFile}`;
 
 describe('chokidar-cli', function () {
 
@@ -47,11 +48,8 @@ describe('chokidar-cli', function () {
             const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
-            // Use a file to detect that trigger command is actually run
-            const touch = 'touch ' + changeFile;
-
             // No quotes needed in glob pattern because node process spawn does no globbing
-            expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
+            expectKilledByTimeout(hideWindowsENOTENT(run(`node index.js "test/dir/**/*.less" -c "${touch}"`, timeToRun)))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -70,13 +68,11 @@ describe('chokidar-cli', function () {
             const timeToRun = TIMEOUT_WATCH_READY + (2 * TIMEOUT_CHANGE_DETECTED) + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
-            const touch = 'touch ' + changeFile;
             const throttleTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
-            expectKilledByTimeout(run(
-                'node index.js "test/dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"',
-                timeToRun,
-            ))
+            expectKilledByTimeout(hideWindowsENOTENT(run(
+                `node index.js "test/dir/**/*.less" --debounce 0 --throttle ${throttleTime} -c "${touch}"`, timeToRun
+            )))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -101,11 +97,9 @@ describe('chokidar-cli', function () {
             const timeToRun = TIMEOUT_WATCH_READY + debounceTime + debouncePadding + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
-            const touch = 'touch ' + changeFile;
-
-            expectKilledByTimeout(
-                run('node index.js "test/dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', timeToRun)
-            )
+            expectKilledByTimeout(hideWindowsENOTENT(
+                run(`node index.js "test/dir/**/*.less" --debounce ${debounceTime} -c "${touch}"`, timeToRun)
+            ))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -129,14 +123,19 @@ describe('chokidar-cli', function () {
 
             const command = "echo '{event}:{path}' > " + changeFile;
 
-            expectKilledByTimeout(run('node index.js "test/dir/a.js" -c "' + command + '"', timeToRun))
+            expectKilledByTimeout(hideWindowsENOTENT(run(`node index.js "test/dir/a.js" -c "${command}"`, timeToRun)))
                 .then(done, done);
 
             setTimeout(function() {
                 writeFileSync(jsFile, 'content');
                 setTimeout(function () {
                     var res = readFileSync(changeFile).toString().trim();
-                    assert.equal(res, 'change:test/dir/a.js', 'need event/path detail');
+                    if (isWin) {
+                        // making up for difference in behavior for echo
+                        assert.equal(res, '\'change:test/dir/a.js\'', 'need event/path detail');
+                    } else {
+                        assert.equal(res, 'change:test/dir/a.js', 'need event/path detail');
+                    }
                 }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
         });
@@ -170,8 +169,6 @@ function deleteChangeFileSync() {
 /** Flag for when a process is killed by the following helper */
 const REASON_TIMEOUT = Symbol('REASON_TIMEOUT');
 
-const isWin = process.platform === 'win32';
-
 /**
  * Run a command. Returns a promise that resolves or rejects when the process finishes. The promise resolves when the
  * process finishes normally, and rejects when the process finishes abnormally (like being killed after a timeout).
@@ -201,6 +198,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
         function e(error) { child.removeListener('close', c); reject(error); }
         function c(exitCode, signal) {
             child.removeListener('error', e);
+
             if (exitCode === 0 && !signal) {
                 return resolve();
             }
@@ -209,9 +207,6 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             reject(error);
         }
         child.once('error', e);
-        // within the child process lifecycle, the close event happens *after* the exit event and also gets the
-        // exit code of the process.
-        // TODO: figure out if inherited (or not) stdio streams make the previous statement untrue.
         child.once('close', c);
 
         setTimeout(() => {
@@ -219,6 +214,23 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             child.kill();
         }, killTimeout);
     });
+}
+
+/**
+ * Shim Windows ENOENT handling. This is needed because of https://github.com/moxystudio/node-cross-spawn/issues/104.
+ * @param {Promise} runPromise - input promise
+ * @returns {Promise} a promise that can stand in place of the original
+ */
+function hideWindowsENOTENT(runPromise) {
+    return runPromise.catch((error) => {
+        if (isWin && error.code === 'ENOENT') {
+            // Let's just treat this like a SIGKILL
+            const fakeError = new Error('child process terminated abnormally');
+            fakeError.reason = REASON_TIMEOUT;
+            throw fakeError;
+        }
+        throw error;
+    })
 }
 
 /**

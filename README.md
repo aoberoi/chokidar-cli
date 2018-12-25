@@ -1,6 +1,7 @@
 # Chokidar CLI
 
 [![Build Status](https://travis-ci.org/aoberoi/chokidar-cli.svg?branch=master)](https://travis-ci.org/aoberoi/chokidar-cli)
+[![Build Status](https://dev.azure.com/aoberoi/chokidar-cli/_apis/build/status/aoberoi.chokidar-cli?branchName=master)](https://dev.azure.com/aoberoi/chokidar-cli/_build/latest?definitionId=1?branchName=master)
 
 Fast cross-platform command line utility to watch file system changes.
 
