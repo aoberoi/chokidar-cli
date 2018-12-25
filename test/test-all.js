@@ -61,20 +61,18 @@ describe('chokidar-cli', function () {
             }, TIMEOUT_WATCH_READY);
         });
 
-        it.skip('should throttle invocations of command', function (done) {
+        it('should throttle invocations of command', function (done) {
             // when two writes to a watched file happen within the throttleTime period, only the first one triggers
             // running the command
 
             const timeToRun = TIMEOUT_WATCH_READY + (2 * TIMEOUT_CHANGE_DETECTED) + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
-            const touch = touchCmd + changeFile;
             const throttleTime = (2 * TIMEOUT_CHANGE_DETECTED) + 100;
 
-            expectKilledByTimeout(run(
-                'node index.js "test/dir/**/*.less" --debounce 0 --throttle ' + throttleTime + ' -c "' + touch + '"',
-                timeToRun,
-            ))
+            expectKilledByTimeout(hideWindowsENOTENT(run(
+                `node index.js "test/dir/**/*.less" --debounce 0 --throttle ${throttleTime} -c "${touch}"`, timeToRun
+            )))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -90,7 +88,7 @@ describe('chokidar-cli', function () {
             }, TIMEOUT_WATCH_READY);
         });
 
-        it.skip('should debounce invocations of command', function (done) {
+        it('should debounce invocations of command', function (done) {
             // when two writes to a watched file happen within the debounceTime period, the command should be run
             // after the debounce time has elapsed (and not before it has elapsed).
 
@@ -99,11 +97,9 @@ describe('chokidar-cli', function () {
             const timeToRun = TIMEOUT_WATCH_READY + debounceTime + debouncePadding + 100;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
-            const touch = touchCmd + changeFile;
-
-            expectKilledByTimeout(
-                run('node index.js "test/dir/**/*.less" --debounce ' + debounceTime + ' -c "' + touch + '"', timeToRun)
-            )
+            expectKilledByTimeout(hideWindowsENOTENT(
+                run(`node index.js "test/dir/**/*.less" --debounce ${debounceTime} -c "${touch}"`, timeToRun)
+            ))
                 .then(done, done);
 
             setTimeout(function afterWatchIsReady() {
@@ -121,13 +117,13 @@ describe('chokidar-cli', function () {
             }, TIMEOUT_WATCH_READY);
         });
 
-        it.skip('should replace {path} and {event} in command', function (done) {
+        it('should replace {path} and {event} in command', function (done) {
             const timeToRun = TIMEOUT_WATCH_READY + TIMEOUT_CHANGE_DETECTED + 200;
             this.timeout(timeToRun + TIMEOUT_PADDING);
 
             const command = "echo '{event}:{path}' > " + changeFile;
 
-            expectKilledByTimeout(run('node index.js "test/dir/a.js" -c "' + command + '"', timeToRun))
+            expectKilledByTimeout(hideWindowsENOTENT(run(`node index.js "test/dir/a.js" -c "${command}"`, timeToRun)))
                 .then(done, done);
 
             setTimeout(function() {
