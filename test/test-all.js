@@ -33,11 +33,11 @@ describe('chokidar-cli', function () {
         this.timeout(timeToRun + TIMEOUT_PADDING);
 
         it('help should be successful', function () {
-            return run('node index.js --help', timeToRun, { shouldInheritStdio: true });
+            return run('node index.js --help', timeToRun);
         });
 
         it('version should be successful', function () {
-            return run('node index.js -v', timeToRun, { shouldInheritStdio: true });
+            return run('node index.js -v', timeToRun);
         });
     });
 
@@ -56,7 +56,7 @@ describe('chokidar-cli', function () {
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
             // TODO: use template literals
-            run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun, { shouldInheritStdio: true })
+            run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun)
                 .catch((error) => {
                     if (error.code === 'ENOENT') {
                         console.log(JSON.stringify(error));
@@ -213,7 +213,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
     }
 
     return new Promise((resolve, reject) => {
-        function e(error) { child.removeListener('exit', c); reject(error); }
+        function e(error) { child.removeListener('close', c); reject(error); }
         function c(exitCode, signal) {
             child.removeListener('error', e);
             console.log(`process ending. exitCode: ${exitCode} signal: ${signal}`);
@@ -226,7 +226,7 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             reject(error);
         }
         child.once('error', e);
-        child.once('exit', c);
+        child.once('close', c);
 
         setTimeout(() => {
             child._killedFromTimeout = true;
