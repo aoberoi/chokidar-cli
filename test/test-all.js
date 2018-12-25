@@ -56,14 +56,8 @@ describe('chokidar-cli', function () {
             // expectKilledByTimeout(run('node index.js "test/dir/**/*.less" -c "' + touch + '"', timeToRun))
             //     .then(done, done);
             // TODO: use template literals
-            run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun)
+            hideWindowsENOTENT(run(`node index.js "test/dir/**/*.less" -c "` + touch + '"', timeToRun))
                 .catch((error) => {
-                    if (error.code === 'ENOENT') {
-                        console.log(JSON.stringify(error));
-                        return done();
-                    }
-
-                    // TODO: let's get something to output here on windows
                     // only swallow the error if the reason was a timeout
                     if (!error.reason || error.reason !== REASON_TIMEOUT) {
                         return done(error);
@@ -216,7 +210,6 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
         function e(error) { child.removeListener('close', c); reject(error); }
         function c(exitCode, signal) {
             child.removeListener('error', e);
-            console.log(`process ending. exitCode: ${exitCode} signal: ${signal}`);
 
             if (exitCode === 0 && !signal) {
                 return resolve();
@@ -233,6 +226,23 @@ function run(cmd, killTimeout, { shouldInheritStdio = false } = {}) {
             child.kill();
         }, killTimeout);
     });
+}
+
+/**
+ * Shim Windows ENOENT handling. This is needed because of https://github.com/moxystudio/node-cross-spawn/issues/104.
+ * @param {Promise} runPromise - input promise
+ * @returns {Promise} a promise that can stand in place of the original
+ */
+function hideWindowsENOTENT(runPromise) {
+    return runPromise.catch((error) => {
+        if (isWin && error.code === 'ENOENT') {
+            // Let's just treat this like a SIGKILL
+            const fakeError = new Error('child process terminated abnormally');
+            fakeError.reason = REASON_TIMEOUT;
+            throw fakeError;
+        }
+        throw error;
+    })
 }
 
 /**
