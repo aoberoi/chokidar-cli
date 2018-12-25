@@ -34,7 +34,7 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    npx mocha test --reporter mocha-junit-reporter
+    npx mocha test
   displayName: 'test'
 
 - task: PublishTestResults@2
