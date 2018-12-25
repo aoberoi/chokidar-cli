@@ -130,7 +130,12 @@ describe('chokidar-cli', function () {
                 writeFileSync(jsFile, 'content');
                 setTimeout(function () {
                     var res = readFileSync(changeFile).toString().trim();
-                    assert.equal(res, 'change:test/dir/a.js', 'need event/path detail');
+                    if (isWin) {
+                        // making up for difference in behavior for echo
+                        assert.equal(res, '\'change:test/dir/a.js\'', 'need event/path detail');
+                    } else {
+                        assert.equal(res, 'change:test/dir/a.js', 'need event/path detail');
+                    }
                 }, TIMEOUT_CHANGE_DETECTED);
             }, TIMEOUT_WATCH_READY);
         });
